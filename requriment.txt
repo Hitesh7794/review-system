@@ -1,0 +1,34 @@
+dashboard---------------->
+move number under name
+filter at top for global(default current date)
+project wise login
+
+
+move status column
+
+
+
+
+center ------------------>
+
+headers should be sticky 
+center code column should be sticky
+center code/name search 
+
+
+project summary -------------------->
+onboarded after required 
+
+
+pending requests ----------------------->
+remove pending status 
+accept/reject buttons
+also show count
+
+
+
+
+users--------->
+project wise login
+
+admin

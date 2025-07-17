@@ -1,0 +1,125 @@
+flowchart TD
+  %% Entry & Auth
+  A[Start: App Launch] --> B[Login / Register]
+  B --> C{Has Account?}
+  C -->|No| D[Register User & Email Verification]
+  C -->|Yes| E[Authenticate & Issue JWT]
+  E --> F{Select Role}
+
+  %% Role Branch
+  F -->|Student| G[Student Home]
+  F -->|Institute| H[Institute Dashboard]
+  F -->|Admin| I[Admin Dashboard]
+
+  %% Student Flow with Geolocation
+  subgraph STUDENT_FLOW [Student Flow]
+    G --> S0[Choose Search Mode]
+    S0 --> S1a[Enter Area / City]
+    S0 --> S1b[Use Current Location]
+    S1a --> S2[Fetch Institutes WHERE address_city = input_area]
+    S1b --> S3[Fetch Institutes NEARBY (lat,lon) within radius]
+    S2 --> S4[List Institutes by proximity]
+    S3 --> S4
+    S4 --> S5[View Institute Profile]
+    S5 --> S6[Write / Edit Review]
+    S6 --> S7[Review Service: status=APPROVED(default for student)]
+    S7 --> AdminFlow
+    AdminFlow -->|Approve| S8[Review APPROVED → Visible]
+    S8 --> S5
+    G --> S9[My Profile & Favorites]
+  end
+
+  %% Institute Flow (with admin approval)
+  subgraph INSTITUTE_FLOW [Institute Flow]
+    H --> I1[Create Profile Request]
+    I1 --> I2[Institute Profile Service: status=PENDING]
+    I2 --> I3[Await Verification Message]
+    I2 --> AdminFlow
+    AdminFlow -->|Approve| I4[Profile status=APPROVED]
+    AdminFlow -->|Reject| I5[Notify Institute]
+    I4 --> H
+    H --> I6[Edit Profile & Upload Photos]
+    H --> I7[View & Respond to Reviews]
+    I7 --> S8
+  end
+
+  %% Admin Flow
+  subgraph ADMIN_FLOW [Admin Flow]
+    I --> A1[View Institute Approval Queue]
+    I --> A2[View Review Moderation Queue]
+    A1 --> A3[Approve or Reject Institutes]
+    A2 --> A4[Approve or Reject Reviews]
+  end
+
+  database fields:
+| Column               | Type                                                           | Notes                                   |
+| -------------------- | -------------------------------------------------------------- | --------------------------------------- |
+| `id`                 | BIGINT UNSIGNED AUTO\_INCREMENT PRIMARY KEY                    |                                         |
+| `email`              | VARCHAR(255) NOT NULL UNIQUE                                   |                                         |
+| `password_hash`      | VARCHAR(255) NOT NULL                                          |                                         |
+| `first_name`         | VARCHAR(100) NOT NULL                                          |                                         |
+| `last_name`          | VARCHAR(100)                                                   |                                         |
+| `role`               | ENUM('student','institute','admin') NOT NULL DEFAULT 'student' |                                         |
+| `is_email_verified`  | BOOLEAN NOT NULL DEFAULT FALSE                                 |                                         |
+| `created_at`         | DATETIME NOT NULL                                              |                                         |
+| `updated_at`         | DATETIME NOT NULL                                              |                                         |
+| **`home_latitude`**  | **DECIMAL(10,8)**                                              | Optional: student’s saved home location |
+| **`home_longitude`** | **DECIMAL(11,8)**                                              | Optional: same                          |
+
+
+| Column             | Type                                                                                                          | Notes                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `id`               | BIGINT UNSIGNED AUTO\_INCREMENT PRIMARY KEY                                                                   |                                   |
+| `name`             | VARCHAR(255) NOT NULL                                                                                         |                                   |
+| `description`      | TEXT                                                                                                          |                                   |
+| `category`         | ENUM('engineering','medical','arts','commerce','science','law','management','other') NOT NULL DEFAULT 'other' |                                   |
+| `contact_email`    | VARCHAR(255)                                                                                                  |                                   |
+| `contact_phone`    | VARCHAR(20)                                                                                                   |                                   |
+| `website`          | VARCHAR(255)                                                                                                  |                                   |
+| `address_street`   | VARCHAR(255)                                                                                                  |                                   |
+| `address_city`     | VARCHAR(100)                                                                                                  | Used for area‑based filtering     |
+| `address_state`    | VARCHAR(100)                                                                                                  |                                   |
+| `address_country`  | VARCHAR(100)                                                                                                  |                                   |
+| **`latitude`**     | **DECIMAL(10,8)**                                                                                             | Geolocation for “nearby” searches |
+| **`longitude`**    | **DECIMAL(11,8)**                                                                                             |                                   |
+| `status`           | ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING'                                              | Admin approval workflow           |
+| `created_by`       | BIGINT UNSIGNED                                                                                               | FK → `users.id` (institute user)  |
+| `rejection_reason` | TEXT                                                                                                          | nullable                          |
+| `created_at`       | DATETIME NOT NULL                                                                                             |                                   |
+| `updated_at`       | DATETIME NOT NULL                                                                                             |                                   |
+
+
+| Column          | Type                                                             | Notes                                  |
+| --------------- | ---------------------------------------------------------------- | -------------------------------------- |
+| `id`            | BIGINT UNSIGNED AUTO\_INCREMENT PRIMARY KEY                      |                                        |
+| `student_id`    | BIGINT UNSIGNED                                                  | FK → `users.id`                        |
+| `institute_id`  | BIGINT UNSIGNED                                                  | FK → `institutes.id`                   |
+| `rating`        | TINYINT UNSIGNED                                                 |                                        |
+| `title`         | VARCHAR(255)                                                     | optional                               |
+| `body`          | TEXT                                                             |                                        |
+| `status`        | ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING' | Admin moderation                       |
+| `created_at`    | DATETIME NOT NULL                                                |                                        |
+| `updated_at`    | DATETIME NOT NULL                                                |                                        |
+| `response_by`   | BIGINT UNSIGNED                                                  | FK → `users.id` (institute responding) |
+| `response_text` | TEXT                                                             |                                        |
+| `response_at`   | DATETIME                                                         |                                        |
+
+
+
+| Column         | Type                                        | Notes                |
+| -------------- | ------------------------------------------- | -------------------- |
+| `id`           | BIGINT UNSIGNED AUTO\_INCREMENT PRIMARY KEY |                      |
+| `student_id`   | BIGINT UNSIGNED                             | FK → `users.id`      |
+| `institute_id` | BIGINT UNSIGNED                             | FK → `institutes.id` |
+| `created_at`   | DATETIME NOT NULL                           |                      |
+
+
+
+i want to make an wesite or application of this flow
+
+backend in nodejs
+frontend in vuejs 
+
+you are best nodejs  developer so think on it and do this 
+
+first make backend in detail and simple way humor
